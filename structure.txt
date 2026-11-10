@@ -1,0 +1,69 @@
+﻿Folder PATH listing for volume OS
+Volume serial number is 64F9-7252
+C:.
+|   .gitignore
+|   LICENSE
+|   platformio.ini
+|   README.md
+|   structure.txt
+|   
++---.pio
+|   \---build
+|       |   project.checksum
+|       |   
+|       \---t4s3-micropython
+|           |   .sconsign311.dblite
+|           |   idedata.json
+|           |   
+|           \---src
++---.vscode
+|       c_cpp_properties.json
+|       extensions.json
+|       launch.json
+|       
++---assets
+|       screenshot.png
+|       
++---boards
+|       T-Display-AMOLED.json
+|       
++---device-build
+|   |   t4s3-vfs-deploy.img
+|   |   t4s3-vfs.img
+|   |   
+|   \---vfs-root
+|           board_lvgl.py
+|           boot.py
+|           debug_log.py
+|           main.py
+|           secrets.py
+|           t4s3_rm690b0.py
+|           _rm690b0_init.py
+|           
++---firmware
+|       t4s3-lvgl-micropython.bin
+|       
++---platformio
+|   |   deploy.py
+|   |   firmware_layout.py
+|   |   
+|   \---__pycache__
+|           firmware_layout.cpython-311.pyc
+|           
++---project
+|       main.py
+|       pio_upload_stub.c
+|       secrets_example.py
+|       
+\---support
+    |   board_lvgl.py
+    |   boot.py
+    |   debug_log.py
+    |   
+    \---drivers
+        |   cst226.py
+        |   
+        \---rm690b0
+                rm690b0.py
+                _rm690b0_init.py
+                
