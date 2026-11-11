@@ -142,4 +142,11 @@ class DeparturePage:
         self.set_departures(SAMPLE_DEPARTURES, stop_name)
 
     def reload_departures(self, event=None):
-        self.load_sample_departures("Karlskrona C")
+        try:
+            with open("selected_station.json", "r") as file:
+                station = json.load(file)
+            stop_name = station["name"]
+        except (OSError, ValueError, KeyError):
+            stop_name = "Karlskrona C"
+
+        self.load_sample_departures(stop_name)

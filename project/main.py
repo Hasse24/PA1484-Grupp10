@@ -48,6 +48,7 @@ class Application:
         )
         self.settings_page = SettingsPage(
             self.tile3,
+            on_station_saved=self.departure_page.reload_departures,
             swedish_font=self.home_page.swedish_font,
             swedish_font_20=self.home_page.swedish_font_20,
             on_filter_saved=self.departure_page.update_departures,
