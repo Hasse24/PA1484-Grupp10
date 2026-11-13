@@ -8,3 +8,4 @@ The T4-S3 cannot connect to eduroam. Use another network or a phone hotspot.
 
 WIFI_SSID      = ""
 WIFI_PASSWORD  = ""
+API_KEY = ""

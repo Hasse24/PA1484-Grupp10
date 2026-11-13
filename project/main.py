@@ -13,6 +13,7 @@ from secrets import WIFI_SSID, WIFI_PASSWORD
 from pages.start_screen import HomePage
 from pages.setting_screen import SettingsPage
 from pages.departure_screen import DeparturePage
+from fetch_data import retrieve_data
 
 class Application:
     def __init__(self):
@@ -27,7 +28,12 @@ class Application:
         log("student application ready")
 
     def startingprocedure(self):
-        self.departure_page.load_sample_departures("Karlskrona C")
+        station_id = "740000230"
+        station_name = "Karlskrona C"
+
+        departures = retrieve_data(station_id)
+        if departures is not None:
+            self.departure_page.set_departures(departures, station_name)
 
     def create_ui(self):
         'Function: Creates UI'

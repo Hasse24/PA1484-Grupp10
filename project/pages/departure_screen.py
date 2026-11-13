@@ -1,8 +1,6 @@
 import lvgl as lv
 import json
-
-
-SAMPLE_DEPARTURES = [('Bus', '12:05', 'Centrum', '5 m'), ('Train', '12:15', 'Malmö C', '15 m'), ('Ferry', '12:25', 'Aspö', '25 m'), ('Bus', '12:05', 'Centrum', '5 m'), ('Train', '12:15', 'Malmö C', '15 m'), ('Ferry', '12:25', 'Aspö', '25 m'), ('Bus', '12:05', 'Centrum', '5 m'), ('Train', '12:15', 'Malmö C', '15 m'), ('Ferry', '12:25', 'Aspö', '25 m')]
+from fetch_data import retrieve_data
 
 
 class DeparturePage:
@@ -138,15 +136,21 @@ class DeparturePage:
                 row["destination"].set_text("")
 
     
-    def load_sample_departures(self, stop_name):
-        self.set_departures(SAMPLE_DEPARTURES, stop_name)
-
     def reload_departures(self, event=None):
-        try:
-            with open("selected_station.json", "r") as file:
-                station = json.load(file)
-            stop_name = station["name"]
-        except (OSError, ValueError, KeyError):
-            stop_name = "Karlskrona C"
 
-        self.load_sample_departures(stop_name)
+        # Read saved station
+
+        with open("selected_station.json", "r") as file:
+            station = json.load(file)
+
+        print("Fetching departures from:", station["name"])
+
+        # Fetch data using selected station ID
+        departures = retrieve_data(str(station["id"]))
+
+        if departures is not None:
+            self.set_departures(
+                departures,
+                station["name"]
+            )
+
