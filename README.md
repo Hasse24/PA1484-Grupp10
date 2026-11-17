@@ -71,6 +71,17 @@ alone.
 
 Your code belongs in the `/project` folder. The only place you should add, change, or remove things from is the [**/project**](project/main.py) folder. Changing anything else might break the code and cause a lot of headaches for all involved parties.
 
+## Group 10 passenger app
+
+Swipe left from Start to Departures, then left again to Settings. Choose and save a stop, return to Departures and press Reload. The dropdown filters bus, train, ferry or all services. Departure times come from [Trafiklab Timetables](https://www.trafiklab.se/api/our-apis/trafiklab-realtime-apis/timetables/) under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The app selects fields and formats the timetable into display rows and countdowns.
+
+Before building for live use, copy `project/secrets_example.py` to `project/secrets.py` and set `WIFI_SSID`, `WIFI_PASSWORD` and your Trafiklab Timetables `API_KEY`. Building with placeholders is sufficient for packaging checks.
+
+- [Coding standard and GitHub workflow](docs/workflow.md)
+- [Acceptance tests, swipe procedure and peer review](docs/acceptance.md)
+- [Test results and outstanding device checks](docs/test-results.md)
+- [Group repository issues](https://github.com/Hasse24/PA1484-Grupp10/issues) and [repository projects](https://github.com/Hasse24/PA1484-Grupp10/projects)
+
 ## How to connect to Wi-Fi
 
 The T4-S3 has built-in Wi-Fi, but it cannot connect to eduroam. Use another

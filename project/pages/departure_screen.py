@@ -1,3 +1,5 @@
+import errno
+
 import lvgl as lv
 import json
 from fetch_data import retrieve_data
@@ -5,7 +7,6 @@ from fetch_data import retrieve_data
 
 class DeparturePage:
     def __init__(self, parent, swedish_font=None, swedish_font_20=None):
-
         self.parent = parent
 
         # Colors and fonts
@@ -14,8 +15,16 @@ class DeparturePage:
         self.WHITE = 0xFFFFFF
         self.MUTED = 0xA8B7D0
         self.font_small = getattr(lv, "font_montserrat_16", None)
-        self.font_medium = swedish_font_20 if swedish_font_20 is not None else getattr(lv, "font_montserrat_20", None)
-        self.font_large = swedish_font if swedish_font is not None else getattr(lv, "font_montserrat_28", None)
+        self.font_medium = (
+            swedish_font_20
+            if swedish_font_20 is not None
+            else getattr(lv, "font_montserrat_20", None)
+        )
+        self.font_large = (
+            swedish_font
+            if swedish_font is not None
+            else getattr(lv, "font_montserrat_28", None)
+        )
         # data
         self.departures = []
 
@@ -24,39 +33,40 @@ class DeparturePage:
 
         # Info about stop
         self.create_text(parent, "Selected stop", 30, 27, self.MUTED, self.font_small)
-        self.stop_label = self.create_text(parent, "Loading data...", 30, 53, self.WHITE, self.font_large)
+        self.stop_label = self.create_text(
+            parent, "Loading data...", 30, 53, self.WHITE, self.font_large
+        )
         self.stop_label.set_width(350)
         self.stop_label.set_long_mode(lv.label.LONG_MODE.SCROLL_CIRCULAR)
 
         self.reload_button = lv.button(parent)
         self.reload_button.set_size(110, 42)
         self.reload_button.set_pos(440, 40)
-        
+
         self.reload_label = lv.label(self.reload_button)
         self.reload_label.set_text("Reload")
         self.reload_label.center()
-        
-        self.reload_button.add_event_cb(
-            self.reload_departures,
-            lv.EVENT.CLICKED,
-            None
-        )
+
+        self.reload_button.add_event_cb(self.reload_departures, lv.EVENT.CLICKED, None)
 
         # Headers
         self.create_text(parent, "TYPE", 30, 115, self.MUTED, self.font_small, 100)
         self.create_text(parent, "IN", 100, 115, self.MUTED, self.font_small, 100)
         self.create_text(parent, "TIME", 180, 115, self.MUTED, self.font_small, 100)
-        self.create_text(parent, "DESTINATION", 280, 115, self.MUTED, self.font_small, 280)
+        self.create_text(
+            parent, "DESTINATION", 280, 115, self.MUTED, self.font_small, 280
+        )
 
         # Departure rows
         self.rows = []
 
         for i in range(5):
-
             y = 155 + i * 48
 
             # row background
-            type_label = self.create_text(parent, "", 20, y, self.WHITE, self.font_medium)
+            type_label = self.create_text(
+                parent, "", 20, y, self.WHITE, self.font_medium
+            )
             type_label.set_size(560, 42)
             type_label.set_style_bg_color(lv.color_hex(self.ROW_BG), 0)
             type_label.set_style_bg_opa(lv.OPA.COVER, 0)
@@ -67,17 +77,25 @@ class DeparturePage:
             # Dictionary
             row = {
                 "type": type_label,
-                "minutes": self.create_text(parent, "", 100, y + 10, self.WHITE, self.font_medium, 100),
-                "time": self.create_text(parent, "", 180, y + 10, self.WHITE, self.font_medium, 100),
-                "destination": self.create_text(parent, "", 280, y + 10, self.WHITE, self.font_medium, 280),
+                "minutes": self.create_text(
+                    parent, "", 100, y + 10, self.WHITE, self.font_medium, 100
+                ),
+                "time": self.create_text(
+                    parent, "", 180, y + 10, self.WHITE, self.font_medium, 100
+                ),
+                "destination": self.create_text(
+                    parent, "", 280, y + 10, self.WHITE, self.font_medium, 280
+                ),
             }
 
             self.rows.append(row)
 
+        self.create_text(
+            parent, "Data from Trafiklab.se", 30, 410, self.MUTED, self.font_small, 300
+        )
         self.update_departures()
 
     def set_departures(self, departures, stop_name=None):
-
         self.departures = departures
 
         if stop_name is not None:
@@ -85,10 +103,8 @@ class DeparturePage:
 
         self.update_departures()
 
-
     # Create a textdiv
     def create_text(self, parent, text, x, y, color, font=None, width=150):
-
         label = lv.label(parent)
         label.set_text(text)
         label.set_pos(x, y)
@@ -101,7 +117,6 @@ class DeparturePage:
 
     # Update departures
     def update_departures(self, event=None):
-
         with open("selected_filter.json", "r") as file:
             saved = json.load(file)
 
@@ -112,16 +127,13 @@ class DeparturePage:
         filtered = []
 
         for departure in self.departures:
-
             kind = departure[0]
 
             if chosen_filter == "All" or kind == chosen_filter:
                 filtered.append(departure)
 
         for i, row in enumerate(self.rows):
-
             if i < len(filtered):
-
                 kind, dep_time, destination, minutes = filtered[i]
 
                 row["type"].set_text(kind)
@@ -135,13 +147,20 @@ class DeparturePage:
                 row["time"].set_text("")
                 row["destination"].set_text("")
 
-    
     def reload_departures(self, event=None):
+        station = {"id": "740000230", "name": "Karlskrona C"}
 
-        # Read saved station
-
-        with open("selected_station.json", "r") as file:
-            station = json.load(file)
+        try:
+            with open("selected_station.json", "r") as file:
+                saved = json.load(file)
+                if isinstance(saved, dict) and saved.get("id") and saved.get("name"):
+                    station = saved
+        except OSError as error:
+            if error.args[0] != errno.ENOENT:
+                raise
+        except ValueError:
+            # A partially written selection should not prevent startup.
+            pass
 
         print("Fetching departures from:", station["name"])
 
@@ -149,8 +168,4 @@ class DeparturePage:
         departures = retrieve_data(str(station["id"]))
 
         if departures is not None:
-            self.set_departures(
-                departures,
-                station["name"]
-            )
-
+            self.set_departures(departures, station["name"])

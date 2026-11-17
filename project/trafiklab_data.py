@@ -1,5 +1,3 @@
-
-
 import time
 
 
@@ -12,10 +10,8 @@ def to_seconds(date_string):
     minute = int(date_string[14:16])
     second = int(date_string[17:19])
 
-    return time.mktime((
-        year, month, day,
-        hour, minute, second, 0, 0
-    ))
+    return time.mktime((year, month, day, hour, minute, second, 0, 0))
+
 
 def to_readible_time(minutes_left):
     if minutes_left >= 60:
@@ -27,9 +23,9 @@ def to_readible_time(minutes_left):
         minutes = str(minutes_left) + " m"
 
     return minutes
-    
-def format_departures(data):
 
+
+def format_departures(data):
     result = []
 
     # Timestamp returned by API
@@ -37,7 +33,6 @@ def format_departures(data):
 
     # Handle each departure seperetly in this loop
     for departure in data.get("departures", []):
-
         route = departure.get("route") or {}
 
         # Transport type
@@ -48,7 +43,7 @@ def format_departures(data):
             "TRAIN": "Train",
             "BOAT": "Ferry",
             "TRAM": "Tram",
-            "METRO": "Metro"
+            "METRO": "Metro",
         }
 
         kind = types.get(mode, mode)
@@ -59,29 +54,22 @@ def format_departures(data):
         destination = destination.replace("é", "e")
 
         # The departure time
-        departure_time = (
-            departure.get("realtime")
-            or departure.get("scheduled")
-        )
+        departure_time = departure.get("realtime") or departure.get("scheduled")
 
         if not departure_time:
             continue
 
-        clock_time = departure_time[11:16]
+        scheduled = departure.get("scheduled")
+        clock_time = scheduled[11:16] if scheduled else "--:--"
 
         # Minutes until departure
         minutes = "--"
         minutes_left = None
 
         if current_time:
-            seconds_left = (
-                to_seconds(departure_time)
-                - to_seconds(current_time)
-            )
+            seconds_left = to_seconds(departure_time) - to_seconds(current_time)
 
-            minutes_left = max(
-                0, (int(seconds_left) + 59) // 60
-            )
+            minutes_left = max(0, (int(seconds_left) + 59) // 60)
 
             minutes = to_readible_time(minutes_left)
 
@@ -91,14 +79,6 @@ def format_departures(data):
             minutes = "Now"
 
         # Tuple matching DeparturePage
-        result.append((
-            kind,
-            clock_time,
-            destination,
-            minutes
-        ))
+        result.append((kind, clock_time, destination, minutes))
 
     return result
-
-
-
