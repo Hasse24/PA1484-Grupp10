@@ -46,7 +46,9 @@ class DeparturePage:
         self.create_text(parent, "TYPE", 30, 115, self.MUTED, self.font_small, 100)
         self.create_text(parent, "IN", 100, 115, self.MUTED, self.font_small, 100)
         self.create_text(parent, "TIME", 180, 115, self.MUTED, self.font_small, 100)
-        self.create_text(parent, "DESTINATION", 280, 115, self.MUTED, self.font_small, 280)
+        self.create_text(parent, "LINE", 246, 115, self.MUTED, self.font_small, 100)
+        self.create_text(parent, "DESTINATION", 310, 115, self.MUTED, self.font_small)
+        self.create_text(parent, "DELAY", 485, 115, self.MUTED, self.font_small, 70)
 
         # Departure rows
         self.rows = []
@@ -69,7 +71,9 @@ class DeparturePage:
                 "type": type_label,
                 "minutes": self.create_text(parent, "", 100, y + 10, self.WHITE, self.font_medium, 100),
                 "time": self.create_text(parent, "", 180, y + 10, self.WHITE, self.font_medium, 100),
-                "destination": self.create_text(parent, "", 280, y + 10, self.WHITE, self.font_medium, 280),
+                "line": self.create_text(parent, "", 246, y + 10, self.WHITE, self.font_medium, 100), 
+                "destination": self.create_text(parent, "", 310, y + 10, self.WHITE, self.font_medium),
+                "delay": self.create_text(parent, "", 485, y + 10, self.WHITE, self.font_medium, 70)
             }
 
             self.rows.append(row)
@@ -122,18 +126,22 @@ class DeparturePage:
 
             if i < len(filtered):
 
-                kind, dep_time, destination, minutes = filtered[i]
+                kind, dep_time, destination, line, minutes, delay = filtered[i]
 
                 row["type"].set_text(kind)
                 row["minutes"].set_text(minutes)
                 row["time"].set_text(dep_time)
+                row["line"].set_text(line)
                 row["destination"].set_text(destination)
+                row["delay"].set_text(delay)
 
             else:
                 row["type"].set_text("")
                 row["minutes"].set_text("")
                 row["time"].set_text("")
+                row["line"].set_text("")
                 row["destination"].set_text("")
+                row["delay"].set_text("")
 
     
     def reload_departures(self, event=None):

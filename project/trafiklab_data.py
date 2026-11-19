@@ -40,6 +40,19 @@ def format_departures(data):
 
         route = departure.get("route") or {}
 
+        delay_sec = departure.get("delay")
+        delay_minutes = delay_sec // 60
+        cancelled = departure.get("canceled")
+
+        if (cancelled == True):
+            delayed = "Canc."
+        else:
+            delayed = to_readible_time(delay_minutes)
+
+        # Extract the transportation line
+        the_line = route.get("designation")or "-"
+        line = str(the_line)
+
         # Transport type
         mode = route.get("transport_mode", "")
 
@@ -71,7 +84,6 @@ def format_departures(data):
 
         # Minutes until departure
         minutes = "--"
-        minutes_left = None
 
         if current_time:
             seconds_left = (
@@ -95,7 +107,9 @@ def format_departures(data):
             kind,
             clock_time,
             destination,
-            minutes
+            line,
+            minutes, 
+            delayed
         ))
 
     return result
