@@ -1,8 +1,11 @@
 import lvgl as lv
 import json
+import network
 
 class SettingsPage:
     def __init__(self, parent, on_station_saved=None, swedish_font=None, swedish_font_20=None, on_filter_saved=None):
+        self.WIFI = "Wi-Fi..."
+        self.API = "API..."
         self.BG = 0x0B1423
         self.parent = parent
         self.on_station_saved = on_station_saved
@@ -14,12 +17,23 @@ class SettingsPage:
         parent.set_style_bg_color(lv.color_hex(self.BG), 0)
         parent.set_style_bg_opa(lv.OPA.COVER, 0)
 
+        self.title_wifi = lv.label(parent)
+        self.title_wifi.set_text(self.WIFI)
+        self.title_wifi.set_style_text_font(self.font_medium, 0)
+        self.title_wifi.set_pos(490, 9)
+
+        self.title_API = lv.label(parent)
+        self.title_API.set_text(self.API)
+        self.title_API.set_style_text_font(self.font_medium, 0)
+        self.title_API.set_pos(370, 9)
+
         self.button = lv.button(parent)
         self.button.set_size(270, 50)
         self.button.align(lv.ALIGN.CENTER, 0,90)
         self.button.set_style_bg_color(lv.color_hex(0x192A43), 0)
         self.button_label = lv.label(self.button)
         self.button_label.set_text("Set as deafult")
+        self.button.add_event_cb( self.save_default, lv.EVENT.CLICKED, None)
         self.button_label.center()
         self.button_label.set_style_text_font(self.font_medium, 0)
         
@@ -27,6 +41,7 @@ class SettingsPage:
         self.button2.set_size(270, 50)
         self.button2.align(lv.ALIGN.CENTER, 0, 30)
         self.button2.set_style_bg_color(lv.color_hex(0x192A43), 0)
+        self.button2.add_event_cb( self.restore_default, lv.EVENT.CLICKED, None)
         self.button_label2 = lv.label(self.button2)
         self.button_label2.set_text("Restore Default")
         self.button_label2.center()
@@ -68,6 +83,57 @@ class SettingsPage:
             self.on_filter_saved()
 
         
+    def check_wifi(self):
+        wlan = network.WLAN(network.STA_IF)
+
+        worked = 1
+
+        if wlan.isconnected():
+            self.WIFI = "WIFI OK"
+        else:
+            self.WIFI = "NO WIFI"
+            worked = 0
+        self.title_wifi.set_text(self.WIFI)
+
+        return worked
+
+    def update_api_status(self, number):
+        if (number == 0):
+            self.title_API.set_text("API ERR")
+        else:
+            self.title_API.set_text("API UP")
+
+    def restore_default (self, event=None):
+        default = {
+                        "name": "Karlskrona C",
+                        "id":"740000230"
+                    }
+        
+        with open("default_station.json", "w") as file:
+            json.dump(default, file)
+
+        default_filter = {
+                                "filter": 0
+                            }
+                            
+        with open("default_filter.json", "w") as file2:
+            json.dump(default_filter, file2)
+        
+
+    def save_default(self, event=None):
+        with open("selected_station.json", "r") as file:
+            saved = json.load(file)
+
+        with open("default_station.json", "w") as file:
+            json.dump(saved, file)
+
+        with open("selected_filter.json", "r") as file:
+                    saved = json.load(file)
+        
+        with open("default_filter.json", "w") as file:
+            json.dump(saved, file)
+  
+
     def create_station_page(self):
 
         # Load stops from local JSON file

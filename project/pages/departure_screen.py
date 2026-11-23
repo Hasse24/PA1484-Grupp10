@@ -7,6 +7,8 @@ class DeparturePage:
     def __init__(self, parent, swedish_font=None, swedish_font_20=None):
 
         self.parent = parent
+        # Connected by Application after the Settings page is created.
+        self.update_api_status = None
 
         # Colors and fonts
         self.BG = 0x0B1423
@@ -154,7 +156,7 @@ class DeparturePage:
         print("Fetching departures from:", station["name"])
 
         # Fetch data using selected station ID
-        departures = retrieve_data(str(station["id"]))
+        departures = retrieve_data(str(station["id"]), self.update_api_status)
 
         if departures is not None:
             self.set_departures(

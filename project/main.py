@@ -1,5 +1,6 @@
 import sys
 import time
+import json
 
 import lvgl as lv
 import network
@@ -22,18 +23,79 @@ class Application:
         self.create_ui()
         self.connect_wifi()
 
-        # Load Karlskrona C at startup
-        self.startingprocedure()
+        # Load previously selected station
+        self.startingprocedure_selected_station()
 
         log("student application ready")
 
-    def startingprocedure(self):
-        station_id = "740000230"
-        station_name = "Karlskrona C"
+        self.refresh_timer = lv.timer_create(
+            self.refresh_departures,
+            60000,
+            None
+        )
 
-        departures = retrieve_data(station_id)
+    def refresh_departures(self, timer):
+        wifi_working = self.settings_page.check_wifi()
+
+        if wifi_working != 1:
+            self.connect_wifi()
+            self.settings_page.check_wifi()
+
+        self.load_selected_station()
+
+    def startingprocedure_selected_station(self):
+
+            #Make the deafult the current selected
+            with open("default_filter.json", "r") as file:
+                saved = json.load(file)
+
+            self.settings_page.dropdown.set_selected(saved["filter"])
+
+            with open("selected_filter.json", "w") as file:
+                json.dump(saved,file)
+    
+            #Make the default station data appear
+            with open("default_station.json", "r") as file:
+                station = json.load(file)
+
+            station_id = str(station["id"])
+            station_name = station["name"]
+
+            with open("selected_station.json", "w") as file:
+                json.dump(station, file)  
+    
+            departures = retrieve_data(station_id, self.settings_page.update_api_status)
+            self.settings_page.check_wifi()
+
+            if departures is not None:
+                self.departure_page.set_departures(
+                    departures,
+                    station_name
+                )
+
+    def load_selected_station(self):
+
+        try:
+            with open("selected_station.json", "r") as file:
+                station = json.load(file)
+
+            station_id = str(station["id"])
+            station_name = station["name"]
+
+        except (OSError, ValueError, KeyError):
+            # Default station
+            station_id = "740000230"
+            station_name = "Karlskrona C"
+
+        print("Fetching departures from:", station_name)
+
+        departures = retrieve_data(station_id, self.settings_page.update_api_status)
+
         if departures is not None:
-            self.departure_page.set_departures(departures, station_name)
+            self.departure_page.set_departures(
+                departures,
+                station_name
+            )
 
     def create_ui(self):
         'Function: Creates UI'
@@ -58,6 +120,10 @@ class Application:
             swedish_font=self.home_page.swedish_font,
             swedish_font_20=self.home_page.swedish_font_20,
             on_filter_saved=self.departure_page.update_departures,
+        )
+
+        self.departure_page.update_api_status = (
+            self.settings_page.update_api_status
         )
 
     @staticmethod
