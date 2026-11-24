@@ -80,6 +80,9 @@ class DeparturePage:
 
             self.rows.append(row)
 
+        # NF3: Trafiklab attribution
+        self.create_text(parent, "Data: Trafiklab.se", 30, 400, self.MUTED, self.font_small, 300)
+
         self.update_departures()
 
     def set_departures(self, departures, stop_name=None):
@@ -150,8 +153,11 @@ class DeparturePage:
 
         # Read saved station
 
-        with open("selected_station.json", "r") as file:
-            station = json.load(file)
+        try:
+            with open("selected_station.json", "r") as file:
+                station = json.load(file)
+        except (OSError, ValueError):
+            station = {"name": "Karlskrona C", "id": "740000230"}
 
         print("Fetching departures from:", station["name"])
 

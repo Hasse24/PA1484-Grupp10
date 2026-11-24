@@ -120,6 +120,7 @@ class Application:
             swedish_font=self.home_page.swedish_font,
             swedish_font_20=self.home_page.swedish_font_20,
             on_filter_saved=self.departure_page.update_departures,
+            on_reload=self.departure_page.reload_departures,
         )
 
         self.departure_page.update_api_status = (
