@@ -1,3 +1,47 @@
+# TrafficAPP – Group 10 (PA1484)
+
+A public transport departure board for Karlskrona, running on the LilyGO T4-S3 (ESP32-S3) with MicroPython and LVGL.
+
+**Group:** Hasan Suleiman, Pontus Nordenfors, Ali Agha, Wassim Akkkash, Hazem Alesa
+
+## Features
+
+| Screen | What it does |
+|---|---|
+| Start | Project name, version, group number and member names (US1.1) |
+| Departures | Up to 5 live departures with type, minutes left, time, line, destination and delay/cancelled (US1.2B), filtered by transport type. Updates automatically every 60 s (US4.1) |
+| Settings | Transport type filter (US3.3), search and choose stop (US3.2C), set as default and restore default (US3.4, US3.5), manual reload (US4.2B), Wi-Fi and API status (US4.3), journey planner (US5.1–US5.3B) |
+
+Swipe left and right to move between the screens (US2.1).
+
+## Project structure (`project/`)
+
+| File | Purpose |
+|---|---|
+| `main.py` | Starts the board, builds the three screens, connects to Wi-Fi and starts the 60 s refresh timer |
+| `pages/start_screen.py` | Start screen and the Swedish fonts |
+| `pages/departure_screen.py` | Departure table and filtering |
+| `pages/setting_screen.py` | Settings, stop search and the journey planner |
+| `trafiklab_api.py` | HTTP requests to Trafiklab Realtime (departures) and ResRobot (journeys) |
+| `trafiklab_data.py` | Converts the API responses into rows and text for the screen |
+| `fetch_data.py` | Connects the API to the screen and updates the API status |
+| `stations.json` | Stops in Karlskrona (name and id) |
+| `default_*.json`, `selected_*.json` | Saved default and current stop and filter |
+
+## Secrets
+
+Copy `project/secrets_example.py` to `project/secrets.py` and fill in `WIFI_SSID`, `WIFI_PASSWORD`, `API_KEY` (Trafiklab Realtime) and `RESROBOT_API_KEY` (Trafiklab ResRobot v2.1). `secrets.py` is excluded by `.gitignore` and must never be committed.
+
+## Data source
+
+Departure and journey data come from [Trafiklab](https://www.trafiklab.se) (Trafiklab Realtime APIs and ResRobot). The application shows this attribution on the departure screen and in the journey result (NF3).
+
+## Quality assurance
+
+See [TESTING.md](TESTING.md) for test levels, the test checklist and the code review process (NF5).
+
+---
+
 # ESP32-T4-S3-MicroPython-Template
 
 Welcome to the lab using the ESP32-T4-S3 LilyGO!

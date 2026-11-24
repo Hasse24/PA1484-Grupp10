@@ -40,7 +40,8 @@ def format_departures(data):
 
         route = departure.get("route") or {}
 
-        delay_sec = departure.get("delay")
+        # The API can leave out the delay, so treat a missing value as 0
+        delay_sec = departure.get("delay") or 0
         delay_minutes = delay_sec // 60
         cancelled = departure.get("canceled")
 
@@ -84,6 +85,7 @@ def format_departures(data):
 
         # Minutes until departure
         minutes = "--"
+        minutes_left = None
 
         if current_time:
             seconds_left = (
@@ -115,4 +117,52 @@ def format_departures(data):
     return result
 
 
+def stop_time(stop):
+    # Use real-time date and time when ResRobot provides them
+    if stop.get("rtDate") and stop.get("rtTime"):
+        return stop["rtDate"], stop["rtTime"]
+    return stop["date"], stop["time"]
 
+
+def format_journey(data):
+    # US5.3B: show the journey with the earliest arrival and every change
+    if not isinstance(data, dict):
+        return "Could not read journey data."
+    if data.get("errorCode") == "SVC_NO_RESULT":
+        return "No journey found."
+    if data.get("errorCode") or not isinstance(data.get("Trip"), list):
+        return "Could not read journey data."
+
+    best_arrival = None
+    best_lines = []
+    for trip in data["Trip"]:
+        try:
+            legs = trip["LegList"]["Leg"]
+            if not legs or any(leg.get("cancelled") for leg in legs):
+                continue
+            # Include the final leg even when the journey ends with a walk.
+            end = legs[-1]["Destination"]
+            arrival = stop_time(end)
+            if best_arrival is not None and arrival >= best_arrival:
+                continue
+            lines = []
+            for leg in legs:
+                if leg["type"] == "JNY":
+                    stop = leg["Origin"]
+                    _, dep_time = stop_time(stop)
+                    action = "Change" if lines else "Depart"
+                    lines.append("%s %s  %s  %s" % (
+                        action, dep_time[:5], stop["name"], leg.get("name", "")
+                    ))
+            if not lines:
+                lines.append("Walk to destination")
+            elif len(lines) == 1:
+                lines.append("Direct - no changes")
+            lines.append("Arrive %s %s  %s" % (arrival[0], arrival[1][:5], end["name"]))
+        except (KeyError, IndexError, TypeError, AttributeError):
+            continue
+        best_arrival, best_lines = arrival, lines
+
+    if best_lines:
+        return "\n".join(best_lines) + "\n\nSource: Trafiklab / ResRobot"
+    return "No journey found."
